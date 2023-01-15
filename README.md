@@ -1,5 +1,7 @@
 # Digicert-test
 
+Java 17
+
 Instructions on how to get webserver up and running:
 Note: MySQL serveer must be up before service can start
 
