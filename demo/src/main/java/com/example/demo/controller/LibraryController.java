@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,14 +34,20 @@ public class LibraryController {
      * @return book entity, if exists
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Book> findBookById(@PathVariable(value = "id") String id) {
+    public ResponseEntity<Map<String, Object>> findBookById(@PathVariable(value = "id") String id) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+
     	 Optional<Book> book = bookRepository.findById(id);
     	 
     	    if(book.isPresent()) {
-    	    	System.out.println("ENTER");
-    	        return ResponseEntity.ok().body(book.get());
+    	    	map.put("status", 1);
+    			map.put("message", "Book was found");
+    			map.put("data", book.get());
+    			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
     	    } else {
-    	        return ResponseEntity.notFound().build();
+    	    	map.put("status", 0);
+    			map.put("message", "book with id: "+ id + " doesn't exist in library");
+    			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.BAD_REQUEST);
     	    }
        
     }
@@ -53,9 +60,13 @@ public class LibraryController {
      * @return id of new entry or failure response
      */
     @PostMapping
-    public ResponseEntity<String> saveBook(@Validated @RequestBody Book book) {
+    public ResponseEntity<Map<String, Object>> saveBook(@Validated @RequestBody Book book) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	
     	if(book.getAuthor()== null|| book.getGenre()== null || book.getIsbn()== null|| book.getTitle() == null ) {
-    		return ResponseEntity.badRequest().body("Missing fields so cannot add entry");
+    		map.put("status", 0);
+			map.put("message", "Missing fields so cannot add entry");
+			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
     	}
     	
     	String removeTrailingSpaces = book.getIsbn().trim();
@@ -66,12 +77,18 @@ public class LibraryController {
     	//check to see if book already exists
     	Optional<Book> bookFound = bookRepository.findById(hexcode);
     	System.out.println("id: " + book.toString());
-    	 
+		
+
     	if(!bookFound.isPresent()) {
     		bookRepository.saveAndFlush(book);
-    		 return ResponseEntity.ok().body(hexcode);
- 	    } else { 	    	
- 	    	return ResponseEntity.badRequest().body("book with that isbn already exists: "+ book.getTitle());
+    		map.put("status", 1);
+			map.put("message", "Book was added to library! The entry id is: "+ hexcode);
+			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
+
+ 	    } else {
+ 	    	map.put("status", 0);
+			map.put("message", "book with that isbn already exists: "+ book.getTitle());
+			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
  	    }
     }
     
@@ -83,14 +100,21 @@ public class LibraryController {
      * @return string response
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteBook(@PathVariable(value = "id") String id) {
+    public ResponseEntity<Map<String, Object>> deleteBook(@PathVariable(value = "id") String id) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+
     	Optional<Book> bookFound =bookRepository.findById(id);
         
         if(bookFound.isPresent()) {
     		bookRepository.deleteById(id);
-        	return ResponseEntity.ok().body("Book with id: " + id + " has been deleted");
+    		map.put("status", 1);
+			map.put("message", "Book successfully removed from library");
+			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
+			
  	    } else {
- 	    	return ResponseEntity.badRequest().body("Book with id: " + id +" doesnt exist");
+ 	    	map.put("status", 0);
+			map.put("message", "Book with id: " + id + " doesnt exist");
+			return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
  	    }
        
     }
@@ -103,15 +127,21 @@ public class LibraryController {
      * @return string response
      */
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateBookDetails(@PathVariable("id") String id,@RequestBody Book updatedItem) {
-
+    public ResponseEntity<Map<String, Object>> updateBookDetails(@PathVariable("id") String id,@RequestBody Book updatedItem) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	
     	if(updatedItem.getAuthor()== null || updatedItem.getGenre()== null || updatedItem.getIsbn()== null|| updatedItem.getTitle()== null ) {
-    		return ResponseEntity.badRequest().body("Missing fields so cannot update entry");
+    		map.put("status", 0);
+			map.put("message", "Missing fields so cannot update entry");
+			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.BAD_REQUEST);
     	}
     	
     	Optional<Book> bookFound =bookRepository.findById(id.trim());
     	 if(!bookFound.isPresent()) {
-    		 return ResponseEntity.badRequest().body("Book with id: " + id +" doesnt exist so cannot update");
+    		 map.put("status", 0);
+ 			map.put("message", "Book with id: " + id +" doesnt exist so cannot update");
+ 			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.NOT_FOUND);
+ 			
   	    } 
     	
     	Book toUpdate = bookRepository.getReferenceById(id);
@@ -120,11 +150,15 @@ public class LibraryController {
     	toUpdate.setIsbn(updatedItem.getIsbn());
     	toUpdate.setTitle(updatedItem.getTitle());
     	
-    	String oldDbId = updatedItem.getDbId();
+    	
     	
     	
     	bookRepository.saveAndFlush(toUpdate);
-    	return ResponseEntity.ok().body("Successfull updated book with id: " + oldDbId);
+
+		map.put("status", 1);
+		map.put("message", "Successfully updated book with id: " + id);
+		return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
+		
     	
     	
     	

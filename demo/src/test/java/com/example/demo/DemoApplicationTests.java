@@ -34,7 +34,7 @@ public class DemoApplicationTests {
 		
 		//book doesn't exist
 		assertThat(this.restTemplate.getForObject("http://localhost:9090/api/book/3977382d332d31362d3134383431302d31",
-				String.class)).isNull();
+				String.class)).contains("doesn't exist in library");
 	}
 	
 	@Test
@@ -56,10 +56,11 @@ public class DemoApplicationTests {
 	@Test
 	public void testDeleteBook() throws Exception {
 
-		//1st entry
+		//1st entry and successful delete
 		this.restTemplate.delete("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30");
 		assertThat(this.restTemplate.getForObject("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30",
-				String.class)).isNull();
+				String.class)).contains("doesn't exist in library");
+		
 
 	}
 	
@@ -75,12 +76,33 @@ public class DemoApplicationTests {
 		//base entry
 		assertThat(this.restTemplate.postForObject("http://localhost:9090/api/book", map, String.class)).doesNotContain("book with that isbn already exists");
 		
-		map.put("title", "harry potter");
+		//good case
+		map.put("title", "harry potter and the sorcerrer's stone");
 		map.put("author", "jk rowling");
 		map.put("genre", "adventure");
 		this.restTemplate.put("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30", map);
 		assertThat(this.restTemplate.getForObject("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30",
-				String.class)).contains("harry potter");
+				String.class)).contains("harry potter and the sorcerrer's stone");
+		
+		
+		//missing fields
+		Map<String, String> missingFields = new HashMap<>();
+		missingFields.put("title", "harry potter: chamber of secrets");
+		this.restTemplate.put("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30", map);
+		assertThat(this.restTemplate.getForObject("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30",
+				String.class)).contains("harry potter and the sorcerrer's stone");
+		
+		
+		//entry doesnt exist
+		Map<String, String> missingEntry = new HashMap<>();
+		missingEntry.put("title", "harry potter: chamber of secrets");
+		missingEntry.put("genre", "adventure");
+		map.put("author", "jk rowling");
+		this.restTemplate.put("http://localhost:9090/api/book/3937382d332d31362d3135383531312d99", map);
+
+		assertThat(this.restTemplate.getForObject("http://localhost:9090/api/book/3937382d332d31362d3135383531312d99",
+				String.class)).contains("doesn't exist in library");
+		
 		
 		//cleanup
 		this.restTemplate.delete("http://localhost:9090/api/book/3937382d332d31362d3135383531312d30");
