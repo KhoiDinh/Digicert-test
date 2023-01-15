@@ -11,7 +11,7 @@ Note: MySQL serveer must be up before service can start
 
 
 
-- Used Spring boot rest api with Java to:
+Used Spring boot rest api with Java to:
   - create api endpoints: Create, Read, Update, and Delete single book and list all books in library
   - contects to Mysql to store and retrieve data, using JpaRepository to execute db queries, and read in JSON formatted queries.
   - used Postman to execute REST API Calls
@@ -19,7 +19,7 @@ Note: MySQL serveer must be up before service can start
   
   
   
- - Example Api Execution
+Example Api Execution
   - CREATE: POST http://localhost:9090/api/book
     {
     "isbn":"978-3-36-159411-0",
