@@ -56,10 +56,10 @@ public class LibraryController {
     public ResponseEntity<String> saveBook(@Validated @RequestBody Book book) {
     	if(book.getAuthor()== null|| book.getGenre()== null || book.getIsbn()== null|| book.getTitle() == null ) {
     		return ResponseEntity.badRequest().body("Missing fields so cannot add entry");
-    		//return "Missing fields so cannot update entry";
     	}
     	
-    	String hexcode = toHex(book.getIsbn());
+    	String removeTrailingSpaces = book.getIsbn().trim();
+    	String hexcode = toHex(removeTrailingSpaces);
     	book.setDbId(hexcode);
     	
     	
@@ -70,11 +70,8 @@ public class LibraryController {
     	if(!bookFound.isPresent()) {
     		bookRepository.saveAndFlush(book);
     		 return ResponseEntity.ok().body(hexcode);
-        	//return hexcode;
- 	    } else {
- 	    	
+ 	    } else { 	    	
  	    	return ResponseEntity.badRequest().body("book with that isbn already exists: "+ book.getTitle());
- 	        //return "book with that isbn already exists";
  	    }
     }
     
@@ -112,7 +109,7 @@ public class LibraryController {
     		return ResponseEntity.badRequest().body("Missing fields so cannot update entry");
     	}
     	
-    	Optional<Book> bookFound =bookRepository.findById(id);
+    	Optional<Book> bookFound =bookRepository.findById(id.trim());
     	 if(!bookFound.isPresent()) {
     		 return ResponseEntity.badRequest().body("Book with id: " + id +" doesnt exist so cannot update");
   	    } 
