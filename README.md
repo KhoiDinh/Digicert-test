@@ -18,6 +18,7 @@ Used Spring boot rest api with Java to:
   - contects to Mysql to store and retrieve data, using JpaRepository to execute db queries, and read in JSON formatted queries.
   - used Postman to execute REST API Calls
   - unit tests for api usability
+  - slf4j to log api call process for debugging
   
   
   
