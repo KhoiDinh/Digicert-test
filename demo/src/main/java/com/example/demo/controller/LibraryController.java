@@ -40,14 +40,14 @@ public class LibraryController {
     	 Optional<Book> book = bookRepository.findById(id);
     	 
     	    if(book.isPresent()) {
-    	    	map.put("status", 1);
+    	    	map.put("status",HttpStatus.OK);
     			map.put("message", "Book was found");
     			map.put("data", book.get());
     			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
     	    } else {
-    	    	map.put("status", 0);
+    	    	map.put("status", HttpStatus.NOT_FOUND);
     			map.put("message", "book with id: "+ id + " doesn't exist in library");
-    			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.BAD_REQUEST);
+    			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.NOT_FOUND);
     	    }
        
     }
@@ -64,7 +64,7 @@ public class LibraryController {
     	Map<String, Object> map = new LinkedHashMap<String, Object>();
     	
     	if(book.getAuthor()== null|| book.getGenre()== null || book.getIsbn()== null|| book.getTitle() == null ) {
-    		map.put("status", 0);
+    		map.put("status", HttpStatus.BAD_REQUEST);
 			map.put("message", "Missing fields so cannot add entry");
 			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
     	}
@@ -81,12 +81,12 @@ public class LibraryController {
 
     	if(!bookFound.isPresent()) {
     		bookRepository.saveAndFlush(book);
-    		map.put("status", 1);
+    		map.put("status", HttpStatus.OK);
 			map.put("message", "Book was added to library! The entry id is: "+ hexcode);
 			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
 
  	    } else {
- 	    	map.put("status", 0);
+ 	    	map.put("status", HttpStatus.BAD_REQUEST);
 			map.put("message", "book with that isbn already exists: "+ book.getTitle());
 			return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
  	    }
@@ -107,12 +107,12 @@ public class LibraryController {
         
         if(bookFound.isPresent()) {
     		bookRepository.deleteById(id);
-    		map.put("status", 1);
+    		map.put("status", HttpStatus.OK);
 			map.put("message", "Book successfully removed from library");
 			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
 			
  	    } else {
- 	    	map.put("status", 0);
+ 	    	map.put("status", HttpStatus.NOT_FOUND);
 			map.put("message", "Book with id: " + id + " doesnt exist");
 			return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
  	    }
@@ -131,14 +131,14 @@ public class LibraryController {
     	Map<String, Object> map = new LinkedHashMap<String, Object>();
     	
     	if(updatedItem.getAuthor()== null || updatedItem.getGenre()== null || updatedItem.getIsbn()== null|| updatedItem.getTitle()== null ) {
-    		map.put("status", 0);
-			map.put("message", "Missing fields so cannot update entry");
+    		map.put("status", HttpStatus.BAD_REQUEST);
+			map.put("message", "Missing fields in request body so cannot update entry");
 			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.BAD_REQUEST);
     	}
     	
     	Optional<Book> bookFound =bookRepository.findById(id.trim());
     	 if(!bookFound.isPresent()) {
-    		 map.put("status", 0);
+    		 map.put("status", HttpStatus.NOT_FOUND);
  			map.put("message", "Book with id: " + id +" doesnt exist so cannot update");
  			return new ResponseEntity<Map<String,Object>>(map, HttpStatus.NOT_FOUND);
  			
@@ -155,7 +155,7 @@ public class LibraryController {
     	
     	bookRepository.saveAndFlush(toUpdate);
 
-		map.put("status", 1);
+		map.put("status", HttpStatus.OK);
 		map.put("message", "Successfully updated book with id: " + id);
 		return new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
 		
