@@ -10,12 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.ArgumentMatchers.notNull;
-
 import java.util.*;
-import com.example.demo.*;
 import com.example.demo.controller.LibraryController;
 import com.example.demo.model.Book;
 
@@ -89,7 +84,7 @@ public class DemoApplicationTests {
 		ResponseEntity<Map<String, Object>> responseDuplicate = controller.saveBook(newBook);
 		Map<String, Object> bodyDupe = responseDuplicate.getBody();
 		Assertions.assertEquals(HttpStatus.BAD_REQUEST, bodyDupe.get("status"));
-		Assertions.assertEquals(true, bodyDupe.get("message").toString().contains("book with that isbn already exists:"));
+		Assertions.assertEquals(true, bodyDupe.get("message").toString().contains("Cannot add book. Book with that isbn already exists:"));
 		//assertThat(this.restTemplate.postForObject("http://localhost:9090/api/book", map, String.class)).contains("book with that isbn already exists");
 		
 		
